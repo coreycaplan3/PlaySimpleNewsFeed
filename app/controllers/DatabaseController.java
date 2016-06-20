@@ -89,6 +89,11 @@ public class DatabaseController extends Controller {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                try {
+                    Thread.sleep(500L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 ArrayList<Message> newsFeed = new ArrayList<>();
                 try {
                     ResultSet resultSet = DB.getConnection()
@@ -110,6 +115,7 @@ public class DatabaseController extends Controller {
                 listener.onNewsFeedLoaded(newsFeed);
             }
         });
+        thread.start();
     }
 
     /**

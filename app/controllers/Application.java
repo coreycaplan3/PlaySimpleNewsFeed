@@ -2,7 +2,12 @@ package controllers;
 
 import controllers.DatabaseController.OnNewsFeedLoadedListener;
 import model.Message;
+import play.api.mvc.*;
+import play.api.mvc.Call;
 import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.index;
 
 import java.util.ArrayList;
 
@@ -12,10 +17,10 @@ public class Application extends Controller {
         DatabaseController.getNewsFeed(new OnNewsFeedLoadedListener() {
             @Override
             public void onNewsFeedLoaded(ArrayList<Message> newsFeed) {
-
+                //TODO redirect, pass in list
             }
         });
-        return ok("Welcome to The Buzz!");
+        return ok(index.render("Welcome to The Buzz!"));
     }
 
     public static Result home() {
