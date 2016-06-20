@@ -1,0 +1,6 @@
+create table if not exists NewsFeed (
+	_id integer primary key auto_increment,
+    title varchar(50),
+    message varchar(140),
+    likes integer default 0 check(likes > 0)
+)
