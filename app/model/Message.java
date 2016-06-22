@@ -12,12 +12,17 @@ public class Message {
     private final String title;
     private final String body;
     private int likes;
+    private boolean isLiked;
 
     public Message(long id, String title, String body, int likes) {
         this.id = id;
         this.title = title;
         this.body = body;
         this.likes = likes;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getTitle() {
@@ -34,5 +39,13 @@ public class Message {
 
     public void setLikes(int likes) {
         this.likes = likes;
+    }
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
     }
 }

@@ -1,47 +1,77 @@
 package controllers;
 
-import controllers.DatabaseController.OnNewsFeedLoadedListener;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import database.DatabaseApi;
 import model.Message;
-import play.api.mvc.*;
-import play.api.mvc.Call;
-import play.mvc.*;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
 
 import java.util.ArrayList;
 
 public class Application extends Controller {
 
     public static Result index() {
-        DatabaseController.getNewsFeed(new OnNewsFeedLoadedListener() {
-            @Override
-            public void onNewsFeedLoaded(ArrayList<Message> newsFeed) {
-                //TODO redirect, pass in list
+        ArrayNode arrayNode = Json.newArray();
+        ArrayList<Message> newsFeed = DatabaseApi.getNewsFeed();
+        if (newsFeed != null) {
+            for (Message message : newsFeed) {
+                ObjectNode objectNode = Json.newObject();
+                objectNode.put("id", message.getId());
+                objectNode.put("title", message.getTitle());
+                objectNode.put("body", message.getBody());
+                objectNode.put("likes", message.getLikes());
+                arrayNode.add(objectNode);
             }
-        });
-        return ok(index.render("Welcome to The Buzz!"));
+        } else {
+            return internalServerError("Server Error");
+        }
+        return ok(arrayNode);
     }
 
-    public static Result home() {
-        return ok("Latest");
+    public static Result createPost() {
+        String title = request().getQueryString("title");
+        String message = request().getQueryString("message");
+        if (title == null || message == null) {
+            return badRequest("Invalid Parameters, expected title and message");
+        }
+        boolean result = DatabaseApi.createMessage(title, message);
+        if (result) {
+            return ok("Successfully created the new post!");
+        } else {
+            return badRequest("Bad Request");
+        }
     }
 
-//    @Override
-//    public void onDatabaseResponse(DatabaseTask databaseTask, boolean response) {
-//        if (databaseTask == DatabaseTask.INSERT_MESSAGE) {
-//
-//        } else if (databaseTask == DatabaseTask.INCREMENT_LIKES) {
-//
-//        } else if (databaseTask == DatabaseTask.DECREMENT_LIKES) {
-//
-//        } else {
-//            System.err.println("Invalid database task, found " + String.valueOf(databaseTask));
-//        }
-//    }
+    public static Result incrementLikes() {
+        long id;
+        try {
+            id = Long.parseLong(request().getQueryString("id"));
+        } catch (Exception e) {
+            return badRequest("Invalid parameter, expected ID");
+        }
+        boolean result = DatabaseApi.incrementLikesForMessage(id);
+        if (result) {
+            return ok("Successful Increment");
+        } else {
+            return badRequest("Bad Request");
+        }
+    }
 
-    public static Result throw404() {
-        return notFound();
+    public static Result decrementLikes() {
+        long id;
+        try {
+            id = Long.parseLong(request().getQueryString("id"));
+        } catch (Exception e) {
+            return badRequest("Invalid parameter, expected ID");
+        }
+        boolean result = DatabaseApi.decrementLikesForMessage(id);
+        if (result) {
+            return ok("Successful Decrement!");
+        } else {
+            return badRequest("Bad Request");
+        }
     }
 
 }
